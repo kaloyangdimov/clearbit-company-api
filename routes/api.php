@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +15,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
+// Guest routes
+Route::prefix('v1')->group(function() {
+    Route::post('sign-in', [UserController::class, 'register'])->name('register');
+    Route::post('log-in', [UserController::class, 'logIn'])->name('log-in');
+    Route::post('forgotten', [UserController::class, 'forgotPassword'])->name('forgotten.pass');
+    Route::post('forgotten/{token}', [UserController::class, 'resetForgottenPassword'])->name('password.reset');
+
+    // Protected routes
+    Route::group(['middleware' => ['auth.api']], function () {
+        Route::post('change-password', [UserController::class, 'changePassword'])->name('password.change');
+        Route::post('company', [TaskController::class, 'requestCompanyData'])->name('company.data');
+        Route::post('getTaskData', [TaskController::class, 'getTaskData'])->name('get.taskData');
+        Route::post('getTaskProgress', [TaskController::class, 'getTaskProgress'])->name('get.taskProgress');
+    });
+});
